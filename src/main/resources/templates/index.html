@@ -1,25 +1,89 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-   <head>
-      <meta charset="UTF-8">
-      <title>Books Shop Online</title>
-      <link rel="stylesheet" type="text/css" th:href="@{/styles.css}" />
-   </head>
-   <body>
-      <th:block th:include="/_header"></th:block>
-      <th:block th:include="/_menu"></th:block>
-       
-      <div class="page-title">Shopping Cart Demo</div>
-      <div class="demo-container">
-         <h3>Demo content</h3>
-         <ul>
-            <li>Buy online</li>
-            <li>Admin pages</li>
-            <li>Reports</li>
-         </ul>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+   <meta name="description" content="">
+   <meta name="author" content="">
+
+   <title>Home Shopping</title>
+
+   <!-- Bootstrap core CSS -->
+   <link th:href="@{/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+
+   <!-- Custom fonts for this template -->
+   <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+   <link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css'>
+   <link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet'
+      type='text/css'>
+   <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'>
+
+   <!-- Custom styles for this template -->
+   <link th:href="@{/css/agency.min.css}" rel="stylesheet">
+
+</head>
+
+<body id="page-top">
+
+   <!-- Navigation -->
+   <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+      <div class="container bg-dark">
+         <a class="navbar-brand js-scroll-trigger" th:href="@{/}">Home Shopping</a>
+         <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+            data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+            aria-label="Toggle navigation">
+            Menu
+            <i class="fas fa-bars"></i>
+         </button>
+         <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav text-uppercase ml-auto">
+               <li class="nav-item">
+                  <a class="nav-link js-scroll-trigger" th:href="@{/productList}">Product List</a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link js-scroll-trigger" th:href="@{/shoppingCart}">My Cart</a>
+               </li>
+               <th:block sec:authorize="hasAnyRole('ROLE_MANAGER','ROLE_EMPLOYEE')">
+                  <li class="nav-item">
+                     <a class="nav-link js-scroll-trigger" th:href="@{/admin/orderList}">Order List</a>
+                  </li>
+               </th:block>
+               <th:block sec:authorize="hasRole('ROLE_MANAGER')">
+                  <li class="nav-item">
+                     <a class="nav-link js-scroll-trigger" th:href="@{/admin/product}">Create Product</a>
+                  </li>
+               </th:block>
+               <th:block sec:authorize="isAuthenticated()">
+                  <li class="nav-item">
+                     <a class="nav-link js-scroll-trigger" th:href="@{/admin/logout}">Logout</a>
+                  </li>
+               </th:block>
+               <th:block sec:authorize="!isAuthenticated()">
+                  <li class="nav-item">
+                     <a class="nav-link js-scroll-trigger" th:href="@{/admin/login}">Login</a>
+                  </li>
+               </th:block>
+            </ul>
+         </div>
       </div>
-       
-      <th:block th:include="/_footer"></th:block>
-       
-   </body>
+   </nav>
+
+   <!-- Header -->
+   <header class="masthead" th:style="'background-image: url(' + @{/images/header-bg.jpg} + ');'">
+      <div class="container">
+         <div class="intro-text">
+            <div class="intro-lead-in">
+               <span class="bg-warning">Welcome To Our Shop!</span>
+            </div>
+            <div class="intro-heading text-uppercase">
+               <span class="bg-warning">It's Nice To Meet You</span>
+            </div>
+         </div>
+      </div>
+   </header>
+
+</body>
+
 </html>
