@@ -1,69 +1,156 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-   <head>
-      <meta charset="UTF-8">
-      <title>Shopping Cart</title>
-      <link rel="stylesheet" type="text/css" th:href="@{/styles.css}">
-   </head>
-   <body>
-      <th:block th:include="/_header"></th:block>
-      <th:block th:include="/_menu"></th:block>
-       
-      <div class="page-title">My Cart</div>
-       
-      <th:block th:if="${cartForm == null || cartForm.cartLines == null || cartForm.cartLines.empty}">
-         <h2>There is no items in Cart</h2>
-         <a th:href="@{/productList}">Show Product List</a>
-      </th:block>
-       
-      <th:block th:if="${cartForm != null && cartForm.cartLines != null && !cartForm.cartLines.empty}">
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+
+<head>
+   <title>Product List</title>
+   <!-- Required meta tags -->
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+   <!-- Bootstrap CSS -->
+   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+   <style>
+      body {
+         padding-top: 56px;
+      }
+   </style>
+</head>
+
+<body>
+   <!-- Navigation -->
+   <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+      <div class="container">
+         <a class="navbar-brand" th:href="@{/}">Home Shopping</a>
+         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+            aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+         </button>
+         <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+               <li class="nav-item">
+                  <a class="nav-link" th:href="@{/}">Home
+                     <span class="sr-only">(current)</span>
+                  </a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link js-scroll-trigger" th:href="@{/productList}">Product List</a>
+               </li>
+               <li class="nav-item active">
+                  <a class="nav-link js-scroll-trigger" th:href="@{/shoppingCart}">My Cart</a>
+               </li>
+               <th:block sec:authorize="hasAnyRole('ROLE_MANAGER','ROLE_EMPLOYEE')">
+                  <li class="nav-item">
+                     <a class="nav-link js-scroll-trigger" th:href="@{/admin/orderList}">Order List</a>
+                  </li>
+               </th:block>
+               <th:block sec:authorize="hasRole('ROLE_MANAGER')">
+                  <li class="nav-item">
+                     <a class="nav-link js-scroll-trigger" th:href="@{/admin/product}">Create Product</a>
+                  </li>
+               </th:block>
+               <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                     aria-haspopup="true" aria-expanded="false" th:utext="${#request.userPrincipal.name}">
+                     Dropdown
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                     <a class="dropdown-item" href="#" th:href="@{/admin/accountInfo}">Account Information</a>
+                     <div class="dropdown-divider"></div>
+                     <a class="dropdown-item" href="#" th:href="@{/admin/logout}">Logout</a>
+                  </div>
+               </li>
+
+               <th:block sec:authorize="!isAuthenticated()">
+                  <li class="nav-item">
+                     <a class="nav-link js-scroll-trigger" th:href="@{/admin/login}">Login</a>
+                  </li>
+               </th:block>
+            </ul>
+         </div>
+      </div>
+   </nav>
+
+   <!-- Page Content -->
+   <div class="container">
+      <!-- Page Heading -->
+         <h1 class="my-4">My Cart
+            <!-- <small>Secondary Text</small> -->
+         </h1>
+
+      <div class="row h-100 align-items-center" th:if="${cartForm == null || cartForm.cartLines == null || cartForm.cartLines.empty}">
+         <div class="col-12 text-center">
+           <h1 class="font-weight-light">There is no items in Cart</h1>
+           <a class="btn btn-primary text-light" th:href="@{/productList}">Show Product List</a>
+         </div>
+       </div>
+
+
+       <th:block th:if="${cartForm != null && cartForm.cartLines != null && !cartForm.cartLines.empty}">
          <form method="POST" th:object="${cartForm}" th:action="@{/shoppingCart}">
-          
-               <div class="product-preview-container"
-                        th:each="cartLineInfo, varStatus : ${cartForm.cartLines}">
-                  <ul>
-                     <li><img class="product-image"
-                        th:src="@{|/productImage?code=${cartLineInfo.productInfo.code}|}" />
-                     </li>
-                     <li>Code: <span th:utext="${cartLineInfo.productInfo.code}"></span>
-                        <input type="hidden"      
-                           th:name="|cartLines[${varStatus.index}].productInfo.code|"                       
-                           th:value="${cartLineInfo.productInfo.code}" />
-                     </li>
-                     <li>Name: <span th:utext="${cartLineInfo.productInfo.name}"></span></li>
-                     <li>Price:
-                        <span class="price"
-                           th:utext="${#numbers.formatDecimal(cartLineInfo.productInfo.price,3,2,'COMMA')}">
-                        </span>
-                     </li>
-                     <li>Quantity:
-                        <input
+            <div class="row">
+               <div class="col-lg-3 col-md-4 col-sm-6 mb-4" th:each="cartLineInfo, varStatus : ${cartForm.cartLines}">
+                  <div class="card h-100">
+                     <a href="#"><img class="card-img-top" th:src="@{|/productImage?code=${cartLineInfo.productInfo.code}|}" alt=""></a>
+                     <div class="card-body">
+                        <h4 class="card-title" th:utext="${cartLineInfo.productInfo.name}">
+                           Project One
+                        </h4>
+                        <p class="card-text">Code: <span th:utext="${cartLineInfo.productInfo.code}"></span>
+                           <input type="hidden"
+                              th:name="|cartLines[${varStatus.index}].productInfo.code|"
+                              th:value="${cartLineInfo.productInfo.code}" /></p>
+                        <p class="card-text">Name: <span th:utext="${cartLineInfo.productInfo.name}"></span></p>
+                        <p class="card-text">Price:
+                           <span class="text-primary"
+                              th:utext="${#numbers.formatDecimal(cartLineInfo.productInfo.price,3,2,'COMMA')}">
+                           </span></p>
+                           <p class="card-text">Quantity:<input
                             th:name="|cartLines[${varStatus.index}].quantity|"
                             th:value="${cartLineInfo.quantity}" />
-                     </li>
-                     <li>Subtotal:
-                        <span class="subtotal"
+                           </p>
+                           <p class="card-text">
+                              Subtotal:
+                        <span class="text-danger"
                            th:utext="${#numbers.formatDecimal(cartLineInfo.amount,3,2,'COMMA')}">
                         </span>
-                     </li>
-                     <li>
-                        <a th:href="@{|/shoppingCartRemoveProduct?code=${cartLineInfo.productInfo.code}|}">
-                        Delete
-                        </a>
-                     </li>
-                  </ul>
-               </div>
-             
-            <div style="clear: both"></div>
-            <input class="button-update-sc" type="submit" value="Update Quantity" />
-            <a class="navi-item"
-               th:href="@{/shoppingCartCustomer}">Enter Customer Info</a>
-            <a class="navi-item"
-               th:href="@{/productList}">Continue Buy</a>
+                           </p>
+                           <p class="card-text">
+
+                           </p>
+                        <a href="#" th:href="@{|/shoppingCartRemoveProduct?code=${cartLineInfo.productInfo.code}|}" class="btn btn-danger">Delete</a>
+                        </div>
+                     </div>
+                  </div>
+              </div>
+              <!-- /.row -->
+              <div class="container text-center mb-4">
+               <input class="btn btn-primary" type="submit" value="Update Quantity" />
+                  <a class="btn btn-success text-light"
+                     th:href="@{/shoppingCartCustomer}">Enter Customer Info</a>
+                  <a class="btn btn-info text-light"
+                     th:href="@{/productList}">Continue Buy</a>
+           </div>
          </form>
-      </th:block>
-       
-      <th:block th:include="/_footer"></th:block>
-       
-   </body>
+       </th:block>
+
+
+
+
+    </div>
+    <!-- /.container -->
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+
 </html>
