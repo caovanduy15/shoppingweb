@@ -1,47 +1,125 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-   <head>
-      <meta charset="UTF-8">
-      <title>Product List</title>
-      <link rel="stylesheet" type="text/css" th:href="@{/styles.css}">
-   </head>
-   <body>
-      <th:block th:include="/_header"></th:block>
-      <th:block th:include="/_menu"></th:block>
- 
-      <div class="page-title">Order List</div>
-      <div>Total Order Count: <span th:utext="${paginationResult.totalRecords}"></span></div>
-      <table border="1" style="width:100%">
-         <tr>
-            <th>Order Num</th>
-            <th>Order Date</th>
-            <th>Customer Name</th>
-            <th>Customer Address</th>
-            <th>Customer Email</th>
-            <th>Amount</th>
-            <th>View</th>
-         </tr>
-         <tr th:each="orderInfo : ${paginationResult.list}">
-            <td th:utext="${orderInfo.orderNum}"></td>
-            <td th:utext="${#dates.format(orderInfo.orderDate,'dd-MM-yyyy HH:mm')}"></td>
-            <td th:utext="${orderInfo.customerName}"></td>
-            <td th:utext="${orderInfo.customerAddress}"></td>
-            <td th:utext="${orderInfo.customerEmail}"></td>
-            <td style="color:red;" th:utext="${#numbers.formatDecimal(orderInfo.amount,3,2,'COMMA')}">
-            </td>
-            <td><a th:href="@{|/admin/order?orderId=${orderInfo.id}|}">View</a></td>
-         </tr>
-      </table>
-      <div class="page-navigator" th:if="${paginationResult.totalPages > 1}" >
-         <th:block th:each="page: ${paginationResult.navigationPages}">
-            <a th:if="${page != -1}" class="nav-item"
-               th:href="@{|/admin/orderList?page=${page}|}" th:utext="${page}"></a>
-                
-            <span th:if="${page == -1}" class="nav-item"> ... </span>
-         </th:block>
+<!doctype html>
+<html lang="en">
+
+<head>
+   <title>Order List</title>
+   <!-- Required meta tags -->
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+   <!-- Bootstrap CSS -->
+   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+   <style>
+      body {
+         padding-top: 56px;
+      }
+   </style>
+</head>
+
+<body>
+   <!-- Navigation -->
+   <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+      <div class="container">
+         <a class="navbar-brand" th:href="@{/}">Home Shopping</a>
+         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+            aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+         </button>
+         <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+               <li class="nav-item">
+                  <a class="nav-link" th:href="@{/}">Home
+                     <span class="sr-only">(current)</span>
+                  </a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link js-scroll-trigger" th:href="@{/productList}">Product List</a>
+               </li>
+               <li class="nav-item">
+                  <a class="nav-link js-scroll-trigger" th:href="@{/shoppingCart}">My Cart</a>
+               </li>
+               <th:block sec:authorize="hasAnyRole('ROLE_MANAGER','ROLE_EMPLOYEE')">
+                  <li class="nav-item active">
+                     <a class="nav-link js-scroll-trigger" th:href="@{/admin/orderList}">Order List</a>
+                  </li>
+               </th:block>
+               <th:block sec:authorize="hasRole('ROLE_MANAGER')">
+                  <li class="nav-item">
+                     <a class="nav-link js-scroll-trigger" th:href="@{/admin/product}">Create Product</a>
+                  </li>
+               </th:block>
+               <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                     aria-haspopup="true" aria-expanded="false" th:utext="${#request.userPrincipal.name}">
+                     Dropdown
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                     <a class="dropdown-item" href="#" th:href="@{/admin/accountInfo}">Account Information</a>
+                     <div class="dropdown-divider"></div>
+                     <a class="dropdown-item" href="#" th:href="@{/admin/logout}">Logout</a>
+                  </div>
+               </li>
+
+               <th:block sec:authorize="!isAuthenticated()">
+                  <li class="nav-item">
+                     <a class="nav-link js-scroll-trigger" th:href="@{/admin/login}">Login</a>
+                  </li>
+               </th:block>
+            </ul>
+         </div>
       </div>
- 
-      <th:block th:include="/_footer"></th:block>
-       
-   </body>
+   </nav>
+
+      <!-- Page Content -->
+      <div class="container">
+         <!-- Page Heading -->
+         <div class="row my-4">
+            <h1 class="col-sm-8">Order List
+               <!-- <small>Secondary Text</small> -->
+            </h1>
+         </div>
+
+         <h3 class="text-center text-danger">Total Order Count: <span th:utext="${paginationResult.totalRecords}">1</span></h3>
+         <table class="table">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col">Order Num</th>
+                <th scope="col">Order Date</th>
+                <th scope="col">Customer Name</th>
+                <th scope="col">Customer Address</th>
+                <th scope="col">Customer Email</th>
+                <th scope="col">Amount</th>
+                <th scope="col">View</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="orderInfo : ${paginationResult.list}">
+                <th scope="row" th:utext="${orderInfo.orderNum}">1</th>
+                <td th:utext="${#dates.format(orderInfo.orderDate,'dd-MM-yyyy HH:mm')}">Mark</td>
+                <td th:utext="${orderInfo.customerName}">Otto</td>
+                <td th:utext="${orderInfo.customerAddress}">@mdo</td>
+                <td th:utext="${orderInfo.customerEmail}">@mdo</td>
+                <td class="text-danger" th:utext="${#numbers.formatDecimal(orderInfo.amount,3,2,'COMMA')}">@mdo</td>
+                <td><a href="#" class="btn btn-primary" th:href="@{|/admin/order?orderId=${orderInfo.id}|}">View</a></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <nav aria-label="Page navigation example" th:if="${paginationResult.totalPages > 1}">
+            <ul class="pagination justify-content-center">
+              <li class="page-item" th:each="page: ${paginationResult.navigationPages}">
+                 <a class="page-link" href="#" th:if="${page != -1}" th:href="@{|/admin/orderList?page=${page}|}" th:utext="${page}">1</a>
+               </li>
+            </ul>
+          </nav>
+
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
 </html>
